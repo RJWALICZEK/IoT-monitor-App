@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tempText: TextView
     private lateinit var humiText: TextView
+    private lateinit var locationText: TextView
 
     private lateinit var lineChart: LineChart
 
@@ -49,6 +50,8 @@ class MainActivity : AppCompatActivity() {
 
         tempText = findViewById(R.id.tempText)
         humiText = findViewById(R.id.humiText)
+        locationText = findViewById(R.id.locationText)
+
 
         //start loop
         handler.post(refreshRunnable)
@@ -102,9 +105,12 @@ class MainActivity : AppCompatActivity() {
                         if (latest != null) {
                             tempText.text = "${latest.temperature}°C"
                             humiText.text = "${latest.humidity}%"
+                            locationText.text = latest.location
                         } else {
                             tempText.text = "-- °C"
                             humiText.text = "-- %"
+                            locationText.text = "---"
+
                         }
                         updateChart(data.take(20).reversed())
                         lineChart.axisLeft.axisMinimum = -10f
@@ -124,6 +130,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {
                     tempText.text = "-- °C"
                     humiText.text = "-- %"
+                    locationText.text = "---"
                 }
             })
     }

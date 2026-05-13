@@ -9,23 +9,37 @@
     android:background="#000302">
 
     <TextView
+        android:id="@+id/locationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="***"
+        android:textColor="#04DFEF"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@id/lineChart"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.283" />
+
+    <TextView
         android:id="@+id/tempText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="140dp"
+        android:layout_marginTop="100dp"
         android:text="-- °C"
         android:textColor="#04DFEF"
         android:textSize="80sp"
         app:layout_constraintEnd_toStartOf="@id/humiText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <TextView
         android:id="@+id/humiText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="20dp"
         android:elevation="8dp"
         android:text="-- %"
         android:textColor="#04DFEF"
@@ -34,25 +48,58 @@
         app:layout_constraintStart_toEndOf="@id/tempText"
         app:layout_constraintTop_toTopOf="@id/tempText" />
 
-    <Button
-        android:id="@+id/buttonHistory"
-        android:layout_width="wrap_content"
-        android:backgroundTint="@null"        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="364dp"
-        android:background="@drawable/button"
-        android:text="HISTORIA"
-        android:textColor="#04DFEF"
-        app:layout_constraintStart_toStartOf="parent"
-        android:backgroundTintMode="src_in"
-        app:layout_constraintTop_toBottomOf="@id/tempText" />
-
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/lineChart"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="271dp"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="264dp"
+        android:layout_marginTop="204dp"
+        android:layout_marginEnd="24dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"></com.github.mikephil.charting.charts.LineChart>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonHistory"
+        android:layout_width="133dp"
+        android:layout_height="68dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="44dp"
+        android:text="HISTORY"
+        android:autoSizeTextType="uniform"
+
+        android:textColor="#04DFEF"
+        android:textSize="12sp"
+        app:backgroundTint="@android:color/transparent"
+        app:cornerRadius="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toBottomOf="@id/lineChart"
+        app:rippleColor="@android:color/transparent"
+        app:strokeColor="#04DFEF"
+        app:strokeWidth="2dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonSettings"
+        android:layout_width="120dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="24dp"
+        android:text="SETTINGS"
+        android:autoSizeTextType="uniform"
+
+
+
+        android:textColor="#04DFEF"
+        android:textSize="12sp"
+        app:backgroundTint="@android:color/transparent"
+        app:cornerRadius="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toBottomOf="@id/buttonHistory"
+        app:rippleColor="@android:color/transparent"
+        app:strokeColor="#04DFEF"
+        app:strokeWidth="2dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
