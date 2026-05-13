@@ -5,17 +5,54 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="#000302">
 
     <TextView
-        android:id="@+id/textData"
-        android:layout_width="match_parent"
+        android:id="@+id/tempText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Loading..."
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="140dp"
+        android:text="-- °C"
+        android:textColor="#04DFEF"
+        android:textSize="80sp"
+        app:layout_constraintEnd_toStartOf="@id/humiText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/humiText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:elevation="8dp"
+        android:text="-- %"
+        android:textColor="#04DFEF"
+        android:textSize="50sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tempText"
+        app:layout_constraintTop_toTopOf="@id/tempText" />
+
+    <Button
+        android:id="@+id/buttonHistory"
+        android:layout_width="wrap_content"
+        android:backgroundTint="@null"        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="364dp"
+        android:background="@drawable/button"
+        android:text="HISTORIA"
+        android:textColor="#04DFEF"
+        app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTintMode="src_in"
+        app:layout_constraintTop_toBottomOf="@id/tempText" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/lineChart"
+        android:layout_width="match_parent"
+        android:layout_height="271dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="264dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

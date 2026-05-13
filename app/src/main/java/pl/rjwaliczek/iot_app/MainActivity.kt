@@ -11,10 +11,19 @@ import androidx.core.view.WindowInsetsCompat
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import android.graphics.Color
+import com.github.mikephil.charting.formatter.ValueFormatter
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var textData: TextView
+    private lateinit var tempText: TextView
+    private lateinit var humiText: TextView
+
+    private lateinit var lineChart: LineChart
 
     private val handler = Handler(Looper.getMainLooper())
     private val refreshInterval: Long = 10000 //10 sek
@@ -30,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-
+        lineChart = findViewById(R.id.lineChart)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -38,7 +47,8 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        textData = findViewById(R.id.textData)
+        tempText = findViewById(R.id.tempText)
+        humiText = findViewById(R.id.humiText)
 
         //start loop
         handler.post(refreshRunnable)
@@ -49,7 +59,35 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         handler.removeCallbacks(refreshRunnable) //stop
     }
+    private fun updateChart(data: List<Measurement>) {
 
+        val entries = data.mapIndexed { index, item ->
+            Entry(index.toFloat(), item.temperature.toFloat())
+        }
+        val entriesHumi = data.mapIndexed { index, item ->
+            Entry(index.toFloat(), item.humidity.toFloat())
+        }
+
+        val dataSet = LineDataSet(entries, "Temperature").apply {
+            color = Color.CYAN
+            valueTextColor = Color.WHITE
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 3f
+
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString()
+                }
+            }
+        }
+
+
+        val lineData = LineData(dataSet)
+
+        lineChart.data = lineData
+        lineChart.invalidate()
+    }
     private fun loadData() {
         RetrofitClient.api.getLatest()
             .enqueue(object : Callback<List<Measurement>> {
@@ -59,22 +97,33 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                         val data = response.body() ?: emptyList()
+                        val latest = data.firstOrNull()
 
-                        val text = data
-                            .take(5)
-                            .joinToString ( "\n\n" ) {
-                                "Temp: ${it.temperature}°C\n" +
-                                "Humi: ${it.humidity}%\n" +
-                                "Location: ${it.location}\n" +
-                                "Time: ${it.ts}"
-                            }
+                        if (latest != null) {
+                            tempText.text = "${latest.temperature}°C"
+                            humiText.text = "${latest.humidity}%"
+                        } else {
+                            tempText.text = "-- °C"
+                            humiText.text = "-- %"
+                        }
+                        updateChart(data.take(20).reversed())
+                        lineChart.axisLeft.axisMinimum = -10f
+                        lineChart.axisLeft.axisMaximum = 30f
+                        lineChart.axisLeft.labelCount = 8
 
-                        textData.text = text ?: "No data"
+                        lineChart.axisRight.isEnabled = false
+
+                        lineChart.description.isEnabled = false
+                        lineChart.animateX(500)
+
+
                     }
 
                 }
+
                 override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {
-                    textData.text = "Error: ${t.message}"
+                    tempText.text = "-- °C"
+                    humiText.text = "-- %"
                 }
             })
     }
