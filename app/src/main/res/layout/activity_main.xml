@@ -97,21 +97,21 @@ app:layout_constraintCircleRadius="15dp"        android:background="#80121212"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
         <TextView
             android:id="@+id/humiText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="20dp"
             android:fontFamily="@font/seven_segment"
             android:text="----%"
             android:textColor="#07e8e1"
             android:textSize="100sp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintTop_toBottomOf="@id/tempText"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-        <TextView
+            app:layout_constraintHorizontal_bias="0.769"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tempText" />
+        <!--<TextView
             android:id="@+id/average"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -127,22 +127,76 @@ app:layout_constraintCircleRadius="15dp"        android:background="#80121212"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="STATS"
-            android:fontFamily="@font/seven_segment"
-            android:textSize="40sp"
-            android:textColor="#07e8e1"
-            android:background="@drawable/button"
-            android:layout_marginTop="37dp"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="STATS"
+           android:fontFamily="@font/seven_segment"
+           android:textSize="40sp"
+           android:textColor="#07e8e1"
+           android:background="@drawable/button"
+           android:layout_marginTop="37dp"
 
-            app:layout_constraintTop_toBottomOf="@id/average"/>
+           app:layout_constraintTop_toBottomOf="@id/average"/>-->
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+   </androidx.constraintlayout.widget.ConstraintLayout>
+   <LinearLayout
+       android:id="@+id/rightColumnLayout"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:orientation="vertical"
+       android:padding="8dp"
+       android:background="#80121212"
 
+       app:layout_constraintTop_toTopOf="@id/constraintLayout"
+       app:layout_constraintBottom_toBottomOf="@id/constraintLayout"
+
+       app:layout_constraintStart_toEndOf="@id/constraintLayout"
+       app:layout_constraintEnd_toEndOf="parent"
+
+       android:layout_marginStart="8dp"
+       android:layout_marginEnd="8dp">
+       <TextView
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="TREND"
+
+           android:textColor="#07e8e1"
+           android:textSize="20dp"/>
+
+       <TextView
+           android:id="@+id/trendTemp"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="---°C/h"
+           android:textColor="#07e8e1"
+           android:textSize="18dp"
+           android:layout_marginTop="30dp"
+           android:layout_marginBottom="10dp"/>
+
+       <TextView
+           android:id="@+id/trendHumi"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="---%/h"
+           android:textColor="#07e8e1"
+           android:textSize="20dp"
+           android:layout_marginTop="65dp"
+           android:layout_marginBottom="10dp"/>
+
+   </LinearLayout>
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/lineChart"
+        android:layout_width="0dp"
+        android:layout_height="190dp"
+        android:layout_margin="16dp"
+
+        app:layout_constraintBottom_toTopOf="@id/dayChart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/dayChart"
         android:layout_width="0dp"
         android:layout_height="190dp"
         android:layout_margin="16dp"

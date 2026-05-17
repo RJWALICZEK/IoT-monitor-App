@@ -23,17 +23,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tempText: TextView
     private lateinit var humiText: TextView
     private lateinit var locationText: TextView
-
     private lateinit var statusText: TextView
-
     private lateinit var lineChart: LineChart
 
+    private lateinit var trendTemp: TextView
+
+    private lateinit var trendHumi: TextView
     private val handler = Handler(Looper.getMainLooper())
     private val refreshInterval: Long = 10000 //10 sek
 
     private val refreshRunnable = object : Runnable {
         override fun run() {
             loadData()
+            loadTrend()
             handler.postDelayed(this, refreshInterval)
         }
     }
@@ -54,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         humiText = findViewById(R.id.humiText)
         locationText = findViewById(R.id.locationText)
         statusText = findViewById(R.id.statusText)
+        trendTemp = findViewById(R.id.trendTemp)
+        trendHumi = findViewById(R.id.trendHumi)
 
 
         //start loop
@@ -108,8 +112,8 @@ class MainActivity : AppCompatActivity() {
 
 
                         if (latest != null) {
-                            tempText.text = "${latest.temperature}°C"
-                            humiText.text = "${latest.humidity}%"
+                            tempText.text = "${latest.temperature}°C  ."
+                            humiText.text = "${latest.humidity}%  ."
                             locationText.text = latest.location
                         } else {
                             tempText.text = "-- °C"
@@ -138,8 +142,72 @@ class MainActivity : AppCompatActivity() {
                     locationText.text = "---"
                     statusText.setTextColor(Color.RED)
                     statusText.text = "OFFLINE"
+                    trendTemp.text = "---°C/h"
+                    trendHumi.text = "---%/h"
 
                 }
             })
     }
+    private fun loadTrend() {
+        RetrofitClient.api.getLastHour()
+            .enqueue(object : Callback<List<Measurement>> {
+                override fun onResponse(
+                    call: Call<List<Measurement>>,
+                    response: Response<List<Measurement>>
+                ) {
+                    if (response.isSuccessful) {
+                        val data = response.body() ?: emptyList()
+
+                        if (data.size >= 2) {
+                            val newest = data.first()
+                            val oldest = data.last()
+
+                            val humiTrend = newest.humidity - oldest.humidity
+                            val tempTrend = newest.temperature - oldest.temperature
+                            val tempArrow =
+                                if (tempTrend > 0) "▲"
+                                else if (tempTrend < 0) "▼"
+                                else "■"
+
+                            trendTemp.text = "${tempArrow}${String.format("%.0f", tempTrend)}°C/h"
+
+                            val humiPrefix = if(humiTrend > 0) "+" else ""
+                            trendHumi.text = "${humiPrefix}${String.format("%.0f", humiTrend)}%/h"
+
+                            trendTemp.setTextColor(
+                                if(tempTrend > 0) {
+                                    Color.RED
+                                }
+                                else if (tempTrend < 0) {
+                                    Color.BLUE
+                                }
+                                else {
+                                    Color.WHITE
+                                }
+                            )
+                            trendHumi.setTextColor(
+                                if(humiTrend > 0) {
+                                    Color.RED
+                                }
+                                else if (humiTrend < 0) {
+                                    Color.WHITE
+                                }
+                                else {
+                                    Color.CYAN
+                                }
+                            )
+                        } else {
+                            trendTemp.text = "---°C/h"
+                            trendHumi.text = "---%/h"
+                        }
+                    }
+                }
+                override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {
+                    trendTemp.text = "---°C/h"
+                    trendHumi.text = "---%/h"
+                }
+            })
+
+    }
+
 }
