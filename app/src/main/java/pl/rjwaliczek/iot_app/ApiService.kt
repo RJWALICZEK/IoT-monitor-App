@@ -6,4 +6,7 @@ import retrofit2.http.GET
 interface ApiService {
     @GET("api/v1/measurements/last-hour")
     fun getLatest(): Call<List<Measurement>>
+
+    @GET("api/v1/measurements/current")
+    fun getCurrent(): Call<List<Measurement>>
 }

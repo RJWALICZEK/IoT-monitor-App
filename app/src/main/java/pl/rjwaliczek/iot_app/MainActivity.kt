@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var humiText: TextView
     private lateinit var locationText: TextView
 
+    private lateinit var statusText: TextView
+
     private lateinit var lineChart: LineChart
 
     private val handler = Handler(Looper.getMainLooper())
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         tempText = findViewById(R.id.tempText)
         humiText = findViewById(R.id.humiText)
         locationText = findViewById(R.id.locationText)
+        statusText = findViewById(R.id.statusText)
 
 
         //start loop
@@ -67,9 +70,7 @@ class MainActivity : AppCompatActivity() {
         val entries = data.mapIndexed { index, item ->
             Entry(index.toFloat(), item.temperature.toFloat())
         }
-        val entriesHumi = data.mapIndexed { index, item ->
-            Entry(index.toFloat(), item.humidity.toFloat())
-        }
+
 
         val dataSet = LineDataSet(entries, "Temperature").apply {
             color = Color.CYAN
@@ -99,8 +100,12 @@ class MainActivity : AppCompatActivity() {
                     response: Response<List<Measurement>>
                 ) {
                     if (response.isSuccessful) {
+                        statusText.setTextColor(Color.GREEN)
+                        statusText.text= "ONLINE"
+
                         val data = response.body() ?: emptyList()
                         val latest = data.firstOrNull()
+
 
                         if (latest != null) {
                             tempText.text = "${latest.temperature}°C"
@@ -131,6 +136,9 @@ class MainActivity : AppCompatActivity() {
                     tempText.text = "-- °C"
                     humiText.text = "-- %"
                     locationText.text = "---"
+                    statusText.setTextColor(Color.RED)
+                    statusText.text = "OFFLINE"
+
                 }
             })
     }

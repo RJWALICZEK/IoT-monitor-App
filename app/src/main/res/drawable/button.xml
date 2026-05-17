@@ -5,14 +5,11 @@
     <solid android:color="@android:color/transparent" />
 
     <!-- kontur -->
-    <stroke
-        android:width="2dp"
-        android:color="#04DFEF"
-        />
+    <stroke android:width="2dp" android:color="#07e8e1"/>
 
 
     <!-- rogi -->
-    <corners android:radius="0dp"/>
+    <corners android:radius="12dp"/>
 
     <!-- padding -->
     <padding
