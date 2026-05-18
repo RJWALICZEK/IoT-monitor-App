@@ -1,5 +1,6 @@
 package pl.rjwaliczek.iot_app
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,15 +9,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import android.graphics.Color
 import com.github.mikephil.charting.formatter.ValueFormatter
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.time.Duration
+import java.time.Instant
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,12 +28,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationText: TextView
     private lateinit var statusText: TextView
     private lateinit var lineChart: LineChart
+    private lateinit var dayChart: LineChart
 
+    private lateinit var deviceStatusText: TextView
     private lateinit var trendTemp: TextView
-
     private lateinit var trendHumi: TextView
+
     private val handler = Handler(Looper.getMainLooper())
-    private val refreshInterval: Long = 10000 //10 sek
+    private val refreshInterval: Long = 10000
 
     private val refreshRunnable = object : Runnable {
         override fun run() {
@@ -44,7 +49,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // ✔ INIT FIRST (WAŻNE!)
         lineChart = findViewById(R.id.lineChart)
+        dayChart = findViewById(R.id.dayChart)
+
+        tempText = findViewById(R.id.tempText)
+        humiText = findViewById(R.id.humiText)
+        locationText = findViewById(R.id.locationText)
+        statusText = findViewById(R.id.serverStatusText)
+        trendTemp = findViewById(R.id.trendTemp)
+        trendHumi = findViewById(R.id.trendHumi)
+        deviceStatusText = findViewById(R.id.deviceStatusText)
+
+        dayChart.setBackgroundColor(Color.parseColor("#121212"))
+        dayChart.isHighlightPerTapEnabled = false
+        dayChart.isHighlightPerDragEnabled = false
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -52,50 +72,39 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        tempText = findViewById(R.id.tempText)
-        humiText = findViewById(R.id.humiText)
-        locationText = findViewById(R.id.locationText)
-        statusText = findViewById(R.id.statusText)
-        trendTemp = findViewById(R.id.trendTemp)
-        trendHumi = findViewById(R.id.trendHumi)
-
-
-        //start loop
         handler.post(refreshRunnable)
-
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacks(refreshRunnable) //stop
+        handler.removeCallbacks(refreshRunnable)
     }
+
+    // ---------------- LINE CHART ----------------
+
     private fun updateChart(data: List<Measurement>) {
 
-        val entries = data.mapIndexed { index, item ->
+        val entries = data.take(20).reversed().mapIndexed { index, item ->
             Entry(index.toFloat(), item.temperature.toFloat())
         }
 
-
         val dataSet = LineDataSet(entries, "Temperature").apply {
-            color = Color.CYAN
-            valueTextColor = Color.WHITE
+            color = Color.parseColor("#07e8e1")
             lineWidth = 2f
             setDrawCircles(true)
             circleRadius = 3f
-
-            valueFormatter = object : ValueFormatter() {
-                override fun getFormattedValue(value: Float): String {
-                    return value.toInt().toString()
-                }
-            }
+            setCircleColor(Color.LTGRAY)
+            valueTextColor = Color.WHITE
+            setDrawValues(false)
+            highLightColor = Color.RED
         }
 
-
-        val lineData = LineData(dataSet)
-
-        lineChart.data = lineData
+        lineChart.data = LineData(dataSet)
         lineChart.invalidate()
     }
+
+    // ---------------- LOAD DATA ----------------
+
     private fun loadData() {
         RetrofitClient.api.getLatest()
             .enqueue(object : Callback<List<Measurement>> {
@@ -103,51 +112,62 @@ class MainActivity : AppCompatActivity() {
                     call: Call<List<Measurement>>,
                     response: Response<List<Measurement>>
                 ) {
-                    if (response.isSuccessful) {
+                    if(response.isSuccessful) {
+
+                        statusText.text = "ONLINE"
                         statusText.setTextColor(Color.GREEN)
-                        statusText.text= "ONLINE"
 
                         val data = response.body() ?: emptyList()
                         val latest = data.firstOrNull()
 
-
                         if (latest != null) {
-                            tempText.text = "${latest.temperature}°C  ."
-                            humiText.text = "${latest.humidity}%  ."
+
+                            tempText.text = "${String.format("%.1f", latest.temperature)}°C  ."
+                            humiText.text = "${String.format("%.1f", latest.humidity)}%  ."
                             locationText.text = latest.location
+
+                            try {
+                                val measurementTime = Instant.parse(latest.ts)
+                                val seconds =
+                                    Duration.between(measurementTime, Instant.now()).seconds
+
+                                if (seconds <= 30) {
+                                    deviceStatusText.text = "ONLINE"
+                                    deviceStatusText.setTextColor(Color.GREEN)
+                                } else {
+                                    deviceStatusText.text = "OFFLINE"
+                                    deviceStatusText.setTextColor(Color.RED)
+                                }
+
+                            } catch (e: Exception) {
+                                deviceStatusText.text = "NO DATA"
+                                deviceStatusText.setTextColor(Color.GRAY)
+                            }
+
                         } else {
                             tempText.text = "-- °C"
                             humiText.text = "-- %"
                             locationText.text = "---"
-
                         }
-                        updateChart(data.take(20).reversed())
-                        lineChart.axisLeft.axisMinimum = -10f
-                        lineChart.axisLeft.axisMaximum = 30f
-                        lineChart.axisLeft.labelCount = 8
 
-                        lineChart.axisRight.isEnabled = false
-
-                        lineChart.description.isEnabled = false
-                        lineChart.animateX(500)
-
-
+                        updateChart(data)
+                        updateDayChart(data)
+                    } else {
+                        statusText.text = "OFFLINE"
+                        statusText.setTextColor(Color.RED)
                     }
-
                 }
 
                 override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {
                     tempText.text = "-- °C"
                     humiText.text = "-- %"
-                    locationText.text = "---"
-                    statusText.setTextColor(Color.RED)
-                    statusText.text = "OFFLINE"
-                    trendTemp.text = "---°C/h"
-                    trendHumi.text = "---%/h"
-
+                    locationText.text = "-------"
                 }
             })
     }
+
+    // ---------------- TREND ----------------
+
     private fun loadTrend() {
         RetrofitClient.api.getLastHour()
             .enqueue(object : Callback<List<Measurement>> {
@@ -155,59 +175,115 @@ class MainActivity : AppCompatActivity() {
                     call: Call<List<Measurement>>,
                     response: Response<List<Measurement>>
                 ) {
-                    if (response.isSuccessful) {
-                        val data = response.body() ?: emptyList()
 
-                        if (data.size >= 2) {
-                            val newest = data.first()
-                            val oldest = data.last()
+                    val data = response.body() ?: emptyList()
 
-                            val humiTrend = newest.humidity - oldest.humidity
-                            val tempTrend = newest.temperature - oldest.temperature
-                            val tempArrow =
-                                if (tempTrend > 0) "▲"
-                                else if (tempTrend < 0) "▼"
-                                else "■"
+                    if (data.size >= 2) {
+                        val newest = data.first()
+                        val oldest = data.last()
 
-                            trendTemp.text = "${tempArrow}${String.format("%.0f", tempTrend)}°C/h"
+                        val tempTrend = newest.temperature - oldest.temperature
+                        val humiTrend = newest.humidity - oldest.humidity
 
-                            val humiPrefix = if(humiTrend > 0) "+" else ""
-                            trendHumi.text = "${humiPrefix}${String.format("%.0f", humiTrend)}%/h"
-
-                            trendTemp.setTextColor(
-                                if(tempTrend > 0) {
-                                    Color.RED
-                                }
-                                else if (tempTrend < 0) {
-                                    Color.BLUE
-                                }
-                                else {
-                                    Color.WHITE
-                                }
-                            )
-                            trendHumi.setTextColor(
-                                if(humiTrend > 0) {
-                                    Color.RED
-                                }
-                                else if (humiTrend < 0) {
-                                    Color.WHITE
-                                }
-                                else {
-                                    Color.CYAN
-                                }
-                            )
-                        } else {
-                            trendTemp.text = "---°C/h"
-                            trendHumi.text = "---%/h"
-                        }
+                        trendTemp.text = "${String.format("%.1f", tempTrend)}°C/h"
+                        trendHumi.text = "${String.format("%.1f", humiTrend)}%/h"
+                    } else {
+                        trendTemp.text = "--°C/h"
+                        trendHumi.text = "--%/h"
                     }
                 }
-                override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {
-                    trendTemp.text = "---°C/h"
-                    trendHumi.text = "---%/h"
-                }
-            })
 
+                override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {}
+            })
     }
 
-}
+    // ---------------- CHART 24h ----------------
+
+    private fun updateDayChart(data: List<Measurement>) {
+
+        val limited = data.takeLast(24)
+
+        val currentHour = java.time.LocalDateTime.now().hour
+
+        val pastEntries = mutableListOf<Entry>()
+        val futureEntries = mutableListOf<Entry>()
+
+        // split data: past vs future
+        limited.forEachIndexed { index, item ->
+            val x = index.toFloat()
+
+            if (index <= currentHour) {
+                pastEntries.add(
+                    Entry(x, item.temperature.toFloat())
+                )
+            } else {
+                futureEntries.add(
+                    Entry(x, item.temperature.toFloat())
+                )
+            }
+        }
+
+        // CYAN (history)
+        val pastDataSet = LineDataSet(pastEntries, "History").apply {
+            color = Color.parseColor("#07e8e1")
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 4f
+            setCircleColor(Color.WHITE)
+            setDrawValues(true)
+            valueTextColor = Color.WHITE
+            highLightColor = Color.parseColor("#07e8e1")
+        }
+
+        // RED (future)
+        val futureDataSet = LineDataSet(futureEntries, "Future").apply {
+            color = Color.parseColor("#ff4d4d")
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 4f
+            setCircleColor(Color.RED)
+            setDrawValues(true)
+            valueTextColor = Color.WHITE
+            highLightColor = Color.parseColor("#ff4d4d")
+            enableDashedLine(10f, 8f, 0f)
+        }
+
+        // set data
+        dayChart.data = LineData(pastDataSet, futureDataSet)
+
+        // X axis (0..23 = godziny)
+        dayChart.xAxis.apply {
+            granularity = 1f
+            labelCount = 6
+            position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
+
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return "${value.toInt()}:00"
+                }
+            }
+
+            removeAllLimitLines()
+        }
+
+        // UI settings
+        dayChart.axisRight.isEnabled = false
+        dayChart.description.isEnabled = false
+        dayChart.legend.isEnabled = true
+
+        // NOW line
+        val nowLine = LimitLine(currentHour.toFloat()).apply {
+            lineColor = Color.parseColor("#07e8e1")
+            lineWidth = 2f
+            label = "NOW"
+            labelPosition = LimitLine.LimitLabelPosition.LEFT_TOP
+            textColor = Color.parseColor("#07e8e1")
+        }
+
+        dayChart.xAxis.addLimitLine(nowLine)
+
+        // highlight current hour
+        dayChart.highlightValue(currentHour.toFloat(), 0)
+
+        dayChart.invalidate()
+    }}
