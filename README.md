@@ -107,12 +107,14 @@ implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0' // wykresy
 
 ## Możliwe przyszłe funkcje
 
-Powiadomienia
-Tryb jasny/ciemny
-Obsługa wielu urządzeń
+- Powiadomienia
+- Tryb jasny/ciemny
+- Obsługa wielu urządzeń
+
+
+
 
 MIT License
 
 Autor
-
 Rafał Waliczek
