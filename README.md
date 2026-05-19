@@ -26,14 +26,14 @@ Aplikacja wyświetla temperaturę oraz wilgotność pobieraną z backendowego AP
   <img src="screenshot/3.png" width="160">
 </p>
 
-/app/screenshots/
-Wykorzystane technologie
-Kotlin
-Android SDK
-Retrofit2
-Gson
-MPAndroidChart
-Struktura projektu
+## Wykorzystane technologie
+- Kotlin
+- Android SDK
+- Retrofit2
+- Gson
+- MPAndroidChart
+
+## Struktura projektu
 app/
 ├── java/pl/rjwaliczek/iot_app/
 │   ├── MainActivity.kt
@@ -51,10 +51,9 @@ Aplikacja komunikuje się z backendowym REST API.
 
 Dostępne endpointy
 Endpoint	Opis
-/api/v1/measurements/latest	Ostatnie pomiary
-/api/v1/measurements/current	Aktualny pomiar
 /api/v1/measurements/last-hour	Dane z ostatniej godziny
-/api/v1/measurements/all	Pełna historia pomiarów
+/api/v1/measurements/last-24h	24 rekordy z ostatnich 24 godzin , odstęp  godzina
+
 Model danych
 data class Measurement (
     val id: Long,
@@ -64,9 +63,11 @@ data class Measurement (
     val device: String,
     val location: String
 )
-Instalacja
+
+## Instalacja
+
 1. Sklonuj repozytorium
-git clone https://github.com/twoj-login/iot-monitor-app.git
+
 2. Otwórz projekt
 
 Uruchom projekt w:
@@ -85,6 +86,7 @@ private const val BASE_URL = "http://10.42.0.1:8080"
 Przykład dla sieci lokalnej:
 
 private const val BASE_URL = "http://192.168.1.100:8080"
+
 4. Uruchom serwer backend
 
 Upewnij się, że REST API działa i jest dostępne z poziomu telefonu lub emulatora Androida.
@@ -103,52 +105,31 @@ Run ▶
 
 w Android Studio.
 
-Zależności
+## Zależności
 
-Dodaj do:
+Dodaj do build.gradle:
 
-build.gradle
-Retrofit
-implementation 'com.squareup.retrofit2:retrofit:2.11.0'
-implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
-MPAndroidChart
-implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-Wykresy
+implementation 'com.squareup.retrofit2:retrofit:2.11.0' -> Retrofit
+implementation 'com.squareup.retrofit2:converter-gson:2.11.0' -> MPAndroidChart
+
+implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0' -> Wykresy
+
 
 Aplikacja zawiera dwa wykresy:
 
-Live Chart
+Live Chart:
 Ostatnie pomiary temperatury
 Automatyczne odświeżanie
-Motyw kolorystyczny cyan
-Wykres 24h
+Wykres 24h:
 Dane historyczne
-Wizualizacja przyszłych wartości
 Znacznik aktualnej godziny („NOW”)
-Wykrywanie statusu urządzenia
 
-Aplikacja sprawdza timestamp ostatniego pomiaru:
 
-<= 30 sekund → ONLINE
+## Możliwe przyszłe funkcje
 
-30 sekund → OFFLINE
-
-Interwał odświeżania
-private val refreshInterval: Long = 10000
-
-Domyślnie:
-
-10000 ms
-10 sekund
-Możliwe przyszłe funkcje
-Obsługa MQTT
 Powiadomienia
 Tryb jasny/ciemny
-Statystyki czujników
-Eksport danych do CSV
 Obsługa wielu urządzeń
-System logowania
-Licencja
 
 MIT License
 
