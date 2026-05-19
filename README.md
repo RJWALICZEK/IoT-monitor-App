@@ -21,12 +21,11 @@ Aplikacja wyświetla temperaturę oraz wilgotność pobieraną z backendowego AP
 # Zrzuty ekranu
 
 <p align="center">
-  <img src="screenshot/1.png" width="250">
-  <img src="screenshot/2.png" width="250">
-  <img src="screenshot/3.png" width="250">
+  <img src="screenshot/1.png" width="160">
+  <img src="screenshot/2.png" width="160">
+  <img src="screenshot/3.png" width="160">
 </p>
 
-```text
 /app/screenshots/
 Wykorzystane technologie
 Kotlin
