@@ -27,8 +27,14 @@ Aplikacja wyświetla temperaturę oraz wilgotność pobieraną z backendowego AP
 </p>
 
 ```text
-Ekran główny aplikacji prezentuje aktualne dane z czujnika IoT w czasie rzeczywistym. Wyświetlana jest bieżąca temperatura, wilgotność oraz lokalizacja urządzenia. Użytkownik widzi również status połączenia z serwerem oraz status samego urządzenia (ONLINE/OFFLINE), który określany jest na podstawie czasu ostatniego pomiaru.
-Na ekranie znajdują się wykresy przedstawiające historię zmian temperatury — zarówno z ostatnich kilku minut, jak i z ostatnich 24 godzin (z rozdzielczością godzinową). Dodatkowo prezentowane są aktualne trendy zmian temperatury i wilgotności, które są automatycznie odświeżane co kilka sekund.
+Ekran główny aplikacji prezentuje aktualne dane z czujnika IoT w czasie rzeczywistym.
+Wyświetlana jest bieżąca temperatura, wilgotność oraz lokalizacja urządzenia.
+Użytkownik widzi również status połączenia z serwerem oraz status samego urządzenia (ONLINE/OFFLINE),
+który określany jest na podstawie czasu ostatniego pomiaru.
+Na ekranie znajdują się wykresy przedstawiające historię zmian temperatury — zarówno z ostatnich kilku minut,
+jak i z ostatnich 24 godzin (z rozdzielczością godzinową).
+Dodatkowo prezentowane są aktualne trendy zmian temperatury i wilgotności,
+które są automatycznie odświeżane co kilka sekund.
 ```
 ## Wykorzystane technologie
 - Kotlin
