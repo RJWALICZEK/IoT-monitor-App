@@ -23,6 +23,7 @@ Aplikacja wyświetla temperaturę oraz wilgotność pobieraną z backendowego AP
 <p align="center">
   <img src="screenshot/1.png" width="250">
   <img src="screenshot/2.png" width="250">
+  <img src="screenshot/3.png" width="250">
 </p>
 
 ```text

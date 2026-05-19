@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         trendHumi = findViewById(R.id.trendHumi)
         deviceStatusText = findViewById(R.id.deviceStatusText)
 
-        dayChart.setBackgroundColor(Color.parseColor("#121212"))
         dayChart.isHighlightPerTapEnabled = false
         dayChart.isHighlightPerDragEnabled = false
 
@@ -98,7 +97,7 @@ class MainActivity : AppCompatActivity() {
             setDrawValues(false)
             highLightColor = Color.RED
         }
-
+        lineChart.description.isEnabled = false
         lineChart.data = LineData(dataSet)
         lineChart.invalidate()
     }
@@ -112,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                     call: Call<List<Measurement>>,
                     response: Response<List<Measurement>>
                 ) {
-                    if(response.isSuccessful) {
+
 
                         statusText.text = "ONLINE"
                         statusText.setTextColor(Color.GREEN)
@@ -145,23 +144,34 @@ class MainActivity : AppCompatActivity() {
                             }
 
                         } else {
-                            tempText.text = "-- °C"
-                            humiText.text = "-- %"
-                            locationText.text = "---"
+                            tempText.text = "-- °C  ."
+                            humiText.text = "-- %  ."
+                            locationText.text = "-------"
+                            statusText.text = "OFFLINE"
+                            deviceStatusText.text = "OFFLINE"
+                            deviceStatusText.setTextColor(Color.RED)
+
+                            statusText.setTextColor(Color.RED)
+                            trendTemp.text = "--°C/h"
+                            trendHumi.text = "--%/h"
                         }
 
                         updateChart(data)
                         updateDayChart(data)
-                    } else {
-                        statusText.text = "OFFLINE"
-                        statusText.setTextColor(Color.RED)
-                    }
+
                 }
 
                 override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {
-                    tempText.text = "-- °C"
-                    humiText.text = "-- %"
+                    tempText.text = "-- °C  ."
+                    humiText.text = "-- %  ."
                     locationText.text = "-------"
+                    statusText.text = "OFFLINE"
+                    deviceStatusText.text = "OFFLINE"
+                    deviceStatusText.setTextColor(Color.RED)
+
+                    statusText.setTextColor(Color.RED)
+                    trendTemp.text = "--°C/h"
+                    trendHumi.text = "--%/h"
                 }
             })
     }
