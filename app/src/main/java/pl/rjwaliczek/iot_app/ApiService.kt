@@ -15,4 +15,7 @@ interface ApiService {
 
     @GET("api/v1/measurements/all")
     fun getAll(): Call<List<Measurement>>
+
+    @GET("api/v1/measurements/last-24h")
+    fun getLast24h(): Call<List<Measurement>>
 }
