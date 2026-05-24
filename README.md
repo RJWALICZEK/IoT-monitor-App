@@ -26,14 +26,26 @@ Aplikacja wyświetla temperaturę oraz wilgotność pobieraną z backendowego AP
   <img src="screenshot/3.png" width="160">
 </p>
 
-/app/screenshots/
-Wykorzystane technologie
-Kotlin
-Android SDK
-Retrofit2
-Gson
-MPAndroidChart
-Struktura projektu
+```text
+Ekran główny aplikacji prezentuje aktualne dane z czujnika IoT w czasie rzeczywistym.
+Wyświetlana jest bieżąca temperatura, wilgotność oraz lokalizacja urządzenia.
+Użytkownik widzi również status połączenia z serwerem oraz status samego urządzenia (ONLINE/OFFLINE),
+który określany jest na podstawie czasu ostatniego pomiaru.
+Na ekranie znajdują się wykresy przedstawiające historię zmian temperatury — zarówno z ostatnich kilku minut,
+jak i z ostatnich 24 godzin (z rozdzielczością godzinową).
+Dodatkowo prezentowane są aktualne trendy zmian temperatury i wilgotności,
+które są automatycznie odświeżane co kilka sekund.
+```
+## Wykorzystane technologie
+- Kotlin
+- Android SDK
+- Retrofit2
+- Gson
+- MPAndroidChart
+
+## Struktura projektu
+
+```text
 app/
 ├── java/pl/rjwaliczek/iot_app/
 │   ├── MainActivity.kt
@@ -45,16 +57,17 @@ app/
 │   ├── layout/
 │   ├── drawable/
 │   ├── values/
-Endpointy API
+```
+
 
 Aplikacja komunikuje się z backendowym REST API.
 
 Dostępne endpointy
-Endpoint	Opis
-/api/v1/measurements/latest	Ostatnie pomiary
-/api/v1/measurements/current	Aktualny pomiar
-/api/v1/measurements/last-hour	Dane z ostatniej godziny
-/api/v1/measurements/all	Pełna historia pomiarów
+```text
+| `/api/v1/measurements/last-hour` | Dane z ostatniej godziny |
+| `/api/v1/measurements/last-24h` | 24 rekordy z ostatnich 24 godzin (co 1h) |
+```
+```kotlin
 Model danych
 data class Measurement (
     val id: Long,
@@ -64,94 +77,44 @@ data class Measurement (
     val device: String,
     val location: String
 )
-Instalacja
+```
+
+## Instalacja
+
 1. Sklonuj repozytorium
-git clone https://github.com/twoj-login/iot-monitor-app.git
-2. Otwórz projekt
-
-Uruchom projekt w:
-
-Android Studio
-3. Skonfiguruj adres backendu
-
-Edytuj plik:
-
-RetrofitClient.kt
-
+2. Otwórz projekt w Android Studio
+3. Skonfiguruj adres backendu edytując plik RetrofitClient.kt:
+```text
 Zmień:
-
 private const val BASE_URL = "http://10.42.0.1:8080"
 
 Przykład dla sieci lokalnej:
-
 private const val BASE_URL = "http://192.168.1.100:8080"
-4. Uruchom serwer backend
+```
+4. Uruchom serwer backend i upewnij się, że REST API działa i jest dostępne z poziomu telefonu lub emulatora Androida.
+5. Uruchom aplikację podłączając telefon z Androidem lub emulator Android
+6.kliknij Run ▶
 
-Upewnij się, że REST API działa i jest dostępne z poziomu telefonu lub emulatora Androida.
 
-5. Uruchom aplikację
+## Zależności
 
-Podłącz:
-
-telefon z Androidem
-lub
-emulator Android
-
-Następnie kliknij:
-
-Run ▶
-
-w Android Studio.
-
-Zależności
-
-Dodaj do:
-
-build.gradle
-Retrofit
+w pliku build.gradle dodaj zależności :
+```text
 implementation 'com.squareup.retrofit2:retrofit:2.11.0'
-implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
-MPAndroidChart
-implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-Wykresy
+implementation 'com.squareup.retrofit2:converter-gson:2.11.0' // JSON
+implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0' // wykresy
+```
 
-Aplikacja zawiera dwa wykresy:
+## Możliwe przyszłe funkcje
 
-Live Chart
-Ostatnie pomiary temperatury
-Automatyczne odświeżanie
-Motyw kolorystyczny cyan
-Wykres 24h
-Dane historyczne
-Wizualizacja przyszłych wartości
-Znacznik aktualnej godziny („NOW”)
-Wykrywanie statusu urządzenia
+- Powiadomienia
+- Tryb jasny/ciemny
+- Obsługa wielu urządzeń
 
-Aplikacja sprawdza timestamp ostatniego pomiaru:
 
-<= 30 sekund → ONLINE
 
-30 sekund → OFFLINE
-
-Interwał odświeżania
-private val refreshInterval: Long = 10000
-
-Domyślnie:
-
-10000 ms
-10 sekund
-Możliwe przyszłe funkcje
-Obsługa MQTT
-Powiadomienia
-Tryb jasny/ciemny
-Statystyki czujników
-Eksport danych do CSV
-Obsługa wielu urządzeń
-System logowania
-Licencja
 
 MIT License
 
 Autor
-
 Rafał Waliczek
