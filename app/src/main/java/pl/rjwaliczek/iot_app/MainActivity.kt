@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         trendHumi = findViewById(R.id.trendHumi)
         deviceStatusText = findViewById(R.id.deviceStatusText)
 
-        dayChart.setBackgroundColor(Color.parseColor("#121212"))
+        dayChart.setBackgroundColor(Color.TRANSPARENT)
         dayChart.isHighlightPerTapEnabled = false
         dayChart.isHighlightPerDragEnabled = false
 
@@ -97,7 +97,8 @@ class MainActivity : AppCompatActivity() {
             setDrawValues(false)
             highLightColor = Color.RED
         }
-
+        lineChart.description.isEnabled = false
+        lineChart.xAxis.isEnabled = false
         lineChart.data = LineData(dataSet)
         lineChart.invalidate()
     }
@@ -191,8 +192,11 @@ class MainActivity : AppCompatActivity() {
                         val tempTrend = newest.temperature - oldest.temperature
                         val humiTrend = newest.humidity - oldest.humidity
 
-                        trendTemp.text = "${String.format("%.1f", tempTrend)}°C/h"
-                        trendHumi.text = "${String.format("%.1f", humiTrend)}%/h"
+
+
+
+                        trendTemp.text = "${if (tempTrend > 0) "+" else ""}${"%.1f".format(tempTrend)}°C/h"
+                        trendHumi.text = "${if (humiTrend > 0) "+" else ""}${"%.1f".format(humiTrend)}%/h"
 
                     } else {
                         trendTemp.text = "--°C/h"
