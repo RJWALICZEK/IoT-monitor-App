@@ -106,7 +106,9 @@ class MainActivity : AppCompatActivity() {
                 ) {
 
                     if (response.isSuccessful) {
-
+                        if (statusText.text != "ONLINE") {
+                            loadDayChartData()
+                        }
                         statusText.text = "ONLINE"
                         statusText.setTextColor(Color.GREEN)
 
@@ -228,57 +230,81 @@ class MainActivity : AppCompatActivity() {
     // ---------------- CHART 24h ----------------
 
     private fun updateDayChart(data: List<Measurement>) {
+        val hourMap = mutableMapOf<Int, Float?>()
+        for (hour in 0..23) {
+            hourMap[hour] = null
+        }
+        data.forEach { item ->
 
-        val limited = data.takeLast(24)
-        val currentHour = java.time.LocalDateTime.now().hour
+            try {
+                val instant = Instant.parse(item.ts)
+                val hour = instant.atZone(java.time.ZoneId.systemDefault()).hour
 
-        val pastEntries = mutableListOf<Entry>()
-        val futureEntries = mutableListOf<Entry>()
+                hourMap[hour] = item.temperature.toFloat()
 
-        limited.forEachIndexed { index, item ->
-
-            val x = index.toFloat()
-
-            if (index <= currentHour) {
-                pastEntries.add(
-                    Entry(x, item.temperature.toFloat())
-                )
-            } else {
-                futureEntries.add(
-                    Entry(x, item.temperature.toFloat())
-                )
+            } catch (_: Exception) {
             }
         }
+        val currentHour = java.time.LocalDateTime.now().hour
 
-        val pastDataSet = LineDataSet(pastEntries, "History").apply {
+
+
+        val validEntries = mutableListOf<Entry>()
+        val missingEntries = mutableListOf<Entry>()
+        val minTemp = data.minOfOrNull { it.temperature }?.toFloat() ?: 0f
+        hourMap.forEach { (hour, temp) ->
+
+            if (temp != null) {
+                validEntries.add(
+                    Entry(hour.toFloat(), temp)
+                )
+            } else {
+                missingEntries.add(
+                    Entry(hour.toFloat(), minTemp - 2f)                )
+            }
+        }
+        val missingDataSet = LineDataSet(missingEntries, "No Data").apply {
+
+            color = Color.RED
+            lineWidth = 0f
+
+            setDrawCircles(true)
+            circleRadius = 6f
+            setCircleColor(Color.RED)
+
+            setDrawValues(false)
+
+            setDrawHighlightIndicators(false)
+        }
+        val validDataSet = LineDataSet(validEntries, "Temperature").apply {
+
             color = Color.parseColor("#07e8e1")
             lineWidth = 2f
+
             setDrawCircles(true)
             circleRadius = 4f
             setCircleColor(Color.WHITE)
+
             setDrawValues(true)
             valueTextColor = Color.WHITE
+            setValueFormatter(object : ValueFormatter() {
+                override fun getPointLabel(entry: Entry?): String {
+                    return "${entry?.y?.toInt()}°C"
+                }
+            })
+
             highLightColor = Color.parseColor("#07e8e1")
+
         }
 
-        val futureDataSet = LineDataSet(futureEntries, "Future").apply {
-            color = Color.parseColor("#ff4d4d")
-            lineWidth = 2f
-            setDrawCircles(true)
-            circleRadius = 4f
-            setCircleColor(Color.RED)
-            setDrawValues(true)
-            valueTextColor = Color.WHITE
-            highLightColor = Color.parseColor("#ff4d4d")
-            enableDashedLine(10f, 8f, 0f)
-        }
-
-        dayChart.data = LineData(pastDataSet, futureDataSet)
+        dayChart.data = LineData(validDataSet, missingDataSet)
 
         dayChart.xAxis.apply {
             granularity = 1f
             labelCount = 6
             position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
+            axisMinimum = 0f
+            axisMaximum = 23f
 
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
@@ -287,6 +313,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             removeAllLimitLines()
+        }
+        dayChart.axisLeft.apply {
+            granularity = 1f
+
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString()
+                }
+            }
         }
 
         dayChart.axisRight.isEnabled = false
@@ -303,7 +338,9 @@ class MainActivity : AppCompatActivity() {
 
         dayChart.xAxis.addLimitLine(nowLine)
         dayChart.highlightValue(currentHour.toFloat(), 0)
-
+        dayChart.setVisibleXRangeMaximum(8f)
+        dayChart.isDragEnabled = true
+        dayChart.setScaleEnabled(false)
         dayChart.invalidate()
     }
     private fun updateChart(data: List<Measurement>) {
