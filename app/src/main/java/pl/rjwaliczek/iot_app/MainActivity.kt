@@ -132,14 +132,22 @@ class MainActivity : AppCompatActivity() {
                                 }
 
                             } catch (e: Exception) {
-                                deviceStatusText.text = "NO DATA"
-                                deviceStatusText.setTextColor(Color.GRAY)
+                                deviceStatusText.text = "OFFLINE"
+                                deviceStatusText.setTextColor(Color.RED)
+                                statusText.text = "OFFLINE"
+                                statusText.setTextColor(Color.RED)
                             }
 
                         } else {
+                            deviceStatusText.text = "OFFLINE"
+                            deviceStatusText.setTextColor(Color.RED)
+                            statusText.text = "OFFLINE"
+                            statusText.setTextColor(Color.RED)
                             tempText.text = "-- °C"
                             humiText.text = "-- %"
-                            locationText.text = "---"
+                            trendTemp.text = "--°C/h"
+                            trendHumi.text = "--%/h"
+                            locationText.text = "-------"
                         }
 
                         updateChart(data)
@@ -151,10 +159,15 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<List<Measurement>>, t: Throwable) {
-
+                    statusText.text = "OFFLINE"
+                    statusText.setTextColor(Color.RED)
+                    deviceStatusText.text = "OFFLINE"
+                    deviceStatusText.setTextColor(Color.RED)
                     tempText.text = "-- °C"
                     humiText.text = "-- %"
                     locationText.text = "-------"
+                    trendTemp.text = "--°C/h"
+                    trendHumi.text = "--%/h"
                 }
             })
     }
