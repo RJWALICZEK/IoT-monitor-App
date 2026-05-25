@@ -34,13 +34,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var trendHumi: TextView
 
     private val handler = Handler(Looper.getMainLooper())
-    private val refreshInterval: Long = 10000
+    private val hourHandler = Handler(Looper.getMainLooper())
+    private val refreshInterval: Long = 10000   //co 10 sek
+    private val hourRefreshInterval: Long = 3600000  //co godzine
 
     private val refreshRunnable = object : Runnable {
         override fun run() {
             loadData()
             loadTrend()
             handler.postDelayed(this, refreshInterval)
+        }
+    }
+    private val hourRunable = object : Runnable {
+        override fun run() {
+            loadDayChartData()
+            hourHandler.postDelayed(this, hourRefreshInterval)
         }
     }
 
@@ -72,36 +80,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         handler.post(refreshRunnable)
+        handler.post(hourRunable)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(refreshRunnable)
+        handler.removeCallbacks(hourRunable)
     }
 
     // ---------------- LINE CHART ----------------
 
-    private fun updateChart(data: List<Measurement>) {
 
-        val entries = data.take(20).reversed().mapIndexed { index, item ->
-            Entry(index.toFloat(), item.temperature.toFloat())
-        }
-
-        val dataSet = LineDataSet(entries, "Temperature").apply {
-            color = Color.parseColor("#07e8e1")
-            lineWidth = 2f
-            setDrawCircles(true)
-            circleRadius = 3f
-            setCircleColor(Color.LTGRAY)
-            valueTextColor = Color.WHITE
-            setDrawValues(false)
-            highLightColor = Color.RED
-        }
-        lineChart.description.isEnabled = false
-        lineChart.xAxis.isEnabled = false
-        lineChart.data = LineData(dataSet)
-        lineChart.invalidate()
-    }
 
     // ---------------- LOAD DATA ----------------
 
@@ -153,7 +143,6 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         updateChart(data)
-                        updateDayChart(data)
 
                     } else {
                         statusText.text = "OFFLINE"
@@ -170,6 +159,21 @@ class MainActivity : AppCompatActivity() {
             })
     }
 
+    private fun loadDayChartData() {
+
+        RetrofitClient.api.getLast24h().enqueue(object: Callback<List<Measurement>> {
+            override fun onResponse( call: Call<List<Measurement>>, response: Response<List<Measurement>>) {
+                if (response.isSuccessful) {
+                    val data = response.body() ?: emptyList()
+                    updateDayChart(data)
+                }
+            }
+
+            override fun onFailure(p0: Call<List<Measurement>>, t: Throwable) {
+                t.printStackTrace()
+            }
+                })
+            }
     // ---------------- TREND ----------------
 
     private fun loadTrend() {
@@ -288,5 +292,26 @@ class MainActivity : AppCompatActivity() {
         dayChart.highlightValue(currentHour.toFloat(), 0)
 
         dayChart.invalidate()
+    }
+    private fun updateChart(data: List<Measurement>) {
+
+        val entries = data.take(20).reversed().mapIndexed { index, item ->
+            Entry(index.toFloat(), item.temperature.toFloat())
+        }
+
+        val dataSet = LineDataSet(entries, "Temperature").apply {
+            color = Color.parseColor("#07e8e1")
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 3f
+            setCircleColor(Color.LTGRAY)
+            valueTextColor = Color.WHITE
+            setDrawValues(false)
+            highLightColor = Color.RED
+        }
+        lineChart.description.isEnabled = false
+        lineChart.xAxis.isEnabled = false
+        lineChart.data = LineData(dataSet)
+        lineChart.invalidate()
     }
 }
